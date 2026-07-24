@@ -3,3 +3,5 @@ packages:
   - 'frontend'
   - 'backend'
   - 'shared'
+allowBuilds:
+  msw: true
