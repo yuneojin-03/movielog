@@ -3,25 +3,27 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-// 개발 환경일 때만 MSW를 실행하는 함수
+// 서버 상태를 관리할 QueryClient 인스턴스 생성
+const queryClient = new QueryClient();
+
 async function enableMocking() {
-  if (process.env.NODE_ENV !== "development") {
+  // Vite 환경에 맞는 환경 변수 문법으로 수정
+  if (!import.meta.env.DEV) {
     return;
   }
-
-  // 방금 만든 browser.ts에서 워커를 불러옵니다
   const { worker } = await import("./mocks/browser");
-
-  // 워커 시작!
   return worker.start();
 }
 
-// MSW가 완전히 켜진 후에 React 앱을 화면에 그립니다(렌더링)
 enableMocking().then(() => {
   ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
-      <App />
+      {/* App을 QueryClientProvider로 감싸줍니다 */}
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
     </React.StrictMode>,
   );
 });
