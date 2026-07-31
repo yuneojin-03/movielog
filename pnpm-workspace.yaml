@@ -5,3 +5,4 @@ packages:
   - 'shared'
 allowBuilds:
   msw: true
+  unrs-resolver: set this to true or false
