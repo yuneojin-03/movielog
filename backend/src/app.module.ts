@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Review } from './entities/review.entity';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { Review } from './entities/review.entity';
       entities: [User, Review],
       synchronize: true, // 개발 환경 전용: Entity 변경 시 DB 테이블 자동 동기화
     }),
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

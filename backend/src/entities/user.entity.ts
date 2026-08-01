@@ -11,6 +11,9 @@ export class User {
   email!: string;
 
   @Column()
+  password!: string;
+
+  @Column()
   name!: string;
 
   @OneToMany(() => Review, (review) => review.user)
