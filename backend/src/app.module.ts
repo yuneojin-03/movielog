@@ -8,6 +8,8 @@ import { Review } from './entities/review.entity';
 import { UsersModule } from './users/users.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MoviesModule } from './movies/movies.module';
+import { ReviewsModule } from './reviews/reviews.module';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
   imports: [
@@ -23,7 +25,9 @@ import { MoviesModule } from './movies/movies.module';
     }),
     UsersModule,
     MoviesModule,
-    ScheduleModule.forRoot(), // 스케줄러 전역 설정 추가
+    ScheduleModule.forRoot(),
+    ReviewsModule,
+    CommentsModule, // 스케줄러 전역 설정 추가
   ],
   controllers: [AppController],
   providers: [AppService],
