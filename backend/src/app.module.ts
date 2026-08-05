@@ -3,8 +3,6 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './entities/user.entity';
-import { Review } from './entities/review.entity';
 import { UsersModule } from './users/users.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MoviesModule } from './movies/movies.module';
@@ -15,19 +13,19 @@ import { CommentsModule } from './comments/comments.module';
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
+      host: process.env.DB_HOST || 'db',
       port: 3306,
-      username: 'root', //  본인의 MySQL 유저명으로 수정한다
-      password: 'password', //  본인의 MySQL 비밀번호로 수정한다
-      database: 'movielog_db',
-      entities: [User, Review],
-      synchronize: true, // 개발 환경 전용: Entity 변경 시 DB 테이블 자동 동기화
+      username: process.env.DB_USERNAME || 'root',
+      password: process.env.DB_PASSWORD || 'root',
+      database: process.env.DB_DATABASE || 'movielog',
+      autoLoadEntities: true,
+      synchronize: true,
     }),
     UsersModule,
     MoviesModule,
     ScheduleModule.forRoot(),
     ReviewsModule,
-    CommentsModule, // 스케줄러 전역 설정 추가
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -53,6 +53,11 @@ export class ReviewsService {
     });
   }
 
+  // 모든 리뷰를 데이터베이스에서 찾아오는 함수
+  async getAllReviews() {
+    return await this.reviewsRepository.find();
+  }
+
   // 리뷰 삭제 로직
   async deleteReview(reviewId: number, userId: number) {
     const review = await this.reviewsRepository.findOne({

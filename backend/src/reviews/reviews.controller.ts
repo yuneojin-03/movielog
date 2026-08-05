@@ -31,6 +31,12 @@ export class ReviewsController {
     return this.reviewsService.getReviewsByMovie(movieId);
   }
 
+  // 전체 리뷰 목록 조회 API (GET /reviews)
+  @Get()
+  getAllReviews() {
+    return this.reviewsService.getAllReviews();
+  }
+
   // 리뷰 삭제 API (DELETE /reviews/:reviewId)
   @Delete(':reviewId')
   deleteReview(
