@@ -26,6 +26,10 @@ export class MoviesService {
     private moviesRepository: Repository<Movie>,
   ) {}
 
+  async findAll(): Promise<Movie[]> {
+    return await this.moviesRepository.find();
+  }
+
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async fetchDailyBoxOffice() {
     this.logger.log('매일 자정: 박스오피스 데이터 업데이트 시작');
@@ -38,7 +42,7 @@ export class MoviesService {
     const url = `http://kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.json?key=${apiKey}&targetDt=${targetDt}`;
 
     try {
-      // 👇 get<KoficResponse>(url) 처럼 우리가 만든 타입을 지정해 주면 에러가 사라진다!
+      // get<KoficResponse>(url) 처럼 우리가 만든 타입을 지정해 주면 에러가 사라진다!
       const response = await lastValueFrom(
         this.httpService.get<KoficResponse>(url),
       );

@@ -2,32 +2,70 @@
 import { useState, useEffect } from "react";
 import { useDebounce } from "../../hooks/useDebounce";
 
+interface Movie {
+  id: number;
+  title: string;
+  poster?: string;
+}
+
 export const ReviewWriteUI = () => {
-  // 영화 검색 상태
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedMovie, setSelectedMovie] = useState<string | null>(null);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-  // 방금 만든 Custom Hook 적용 (500ms 지연)
+  // 백엔드에서 가져온 전체 영화 목록
+  const [movies, setMovies] = useState<Movie[]>([]);
+
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
-
-  // 리뷰 입력 상태
   const [content, setContent] = useState("");
   const [rating, setRating] = useState(5);
 
-  // 💡 디바운스 동작 확인용 useEffect
+  // 컴포넌트가 처음 켜질 때 백엔드에서 영화 목록 가져오기
   useEffect(() => {
-    if (debouncedSearchTerm) {
-      console.log(
-        `📡 서버로 영화 검색 API 요청 전송: "${debouncedSearchTerm}"`,
-      );
+    fetch("http://localhost:3000/movies")
+      .then((res) => res.json())
+      .then((data) => setMovies(data))
+      .catch((err) => console.error("영화 목록 로드 실패:", err));
+  }, []);
+
+  // useEffect 없이 렌더링 과정에서 디바운스된 검색어로 실시간 필터링
+  const searchResults = movies.filter((movie) =>
+    movie.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()),
+  );
+
+  const handleSubmit = async () => {
+    if (!selectedMovie) return;
+
+    try {
+      const response = await fetch("http://localhost:3000/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: 1, // 임시로 고정된 사용자 ID
+          movieId: selectedMovie.id,
+          content: content,
+          rating: rating,
+        }),
+      });
+
+      if (response.ok) {
+        alert("리뷰가 성공적으로 등록되었습니다!");
+        setContent("");
+        setRating(5);
+        setSelectedMovie(null);
+        setSearchTerm("");
+      } else {
+        alert("리뷰 등록에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("에러 발생:", error);
+      alert("서버와 통신 중 문제가 발생했습니다.");
     }
-  }, [debouncedSearchTerm]);
+  };
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-sm border mt-6">
       <h2 className="text-2xl font-bold mb-6">리뷰 작성하기</h2>
 
-      {/* 영화 검색 및 선택 영역 */}
       {!selectedMovie ? (
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-gray-800">
@@ -37,29 +75,38 @@ export const ReviewWriteUI = () => {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="영화 제목을 검색하세요 (예: 인사이드 아웃 2)"
+            placeholder="영화 제목을 검색하세요"
             className="w-full border p-3 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
           />
-          {debouncedSearchTerm && (
-            <div className="p-4 bg-slate-50 rounded-md border flex justify-between items-center">
-              <span>
-                검색 결과: <strong>{debouncedSearchTerm}</strong>
-              </span>
-              <button
-                onClick={() => setSelectedMovie(debouncedSearchTerm)}
-                className="px-4 py-2 bg-slate-800 text-white rounded hover:bg-slate-700"
+
+          <div className="grid grid-cols-3 gap-4 mt-4">
+            {searchResults.map((movie) => (
+              <div
+                key={movie.id}
+                onClick={() => setSelectedMovie(movie)}
+                className="cursor-pointer border rounded-md p-2 hover:shadow-md transition-shadow flex flex-col items-center bg-gray-50"
               >
-                이 영화 선택
-              </button>
-            </div>
+                <div className="w-full h-36 bg-gray-200 rounded flex items-center justify-center mb-2 text-gray-500 text-xs">
+                  {movie.title} 포스터
+                </div>
+                <span className="text-sm font-medium text-center">
+                  {movie.title}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {searchResults.length === 0 && (
+            <p className="text-gray-500 text-center mt-4">
+              검색 결과가 없습니다.
+            </p>
           )}
         </div>
       ) : (
-        /* 선택된 영화 리뷰 텍스트 및 별점 입력 영역 */
         <div className="space-y-4">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-gray-800">
-              2단계: '{selectedMovie}' 리뷰 작성
+              2단계: '{selectedMovie.title}' 리뷰 작성
             </h3>
             <button
               onClick={() => setSelectedMovie(null)}
@@ -89,7 +136,7 @@ export const ReviewWriteUI = () => {
             className="w-full border p-3 rounded-md h-32 focus:ring-2 focus:ring-blue-500 outline-none"
           />
           <button
-            onClick={() => alert("리뷰가 성공적으로 등록되었습니다!")}
+            onClick={handleSubmit}
             className="w-full bg-blue-600 text-white py-3 rounded-md font-bold hover:bg-blue-700"
           >
             리뷰 등록하기
