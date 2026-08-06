@@ -17,6 +17,8 @@ services:
     container_name: movielog-backend
     ports:
       - "3000:3000"
+    env_file:
+      - ./backend/.env
     depends_on:
       - db
     environment:
