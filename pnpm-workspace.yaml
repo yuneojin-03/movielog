@@ -4,6 +4,6 @@ packages:
   - 'backend'
   - 'shared'
 allowBuilds:
-  bcrypt: set this to true or false
+  bcrypt: true
   msw: true
-  unrs-resolver: set this to true or false
+  unrs-resolver: true

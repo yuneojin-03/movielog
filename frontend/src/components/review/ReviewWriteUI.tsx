@@ -1,6 +1,7 @@
 // frontend/src/components/review/ReviewWriteUI.tsx
 import { useState, useEffect } from "react";
 import { useDebounce } from "../../hooks/useDebounce";
+import { useAuthStore } from "../../store/useAuthStore";
 
 interface Movie {
   id: number;
@@ -9,6 +10,8 @@ interface Movie {
 }
 
 export const ReviewWriteUI = () => {
+  const { userId } = useAuthStore();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
@@ -40,7 +43,7 @@ export const ReviewWriteUI = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: 1, // 임시로 고정된 사용자 ID
+          userId: userId,
           movieId: selectedMovie.id,
           content: content,
           rating: rating,
@@ -86,9 +89,17 @@ export const ReviewWriteUI = () => {
                 onClick={() => setSelectedMovie(movie)}
                 className="cursor-pointer border rounded-md p-2 hover:shadow-md transition-shadow flex flex-col items-center bg-gray-50"
               >
-                <div className="w-full h-36 bg-gray-200 rounded flex items-center justify-center mb-2 text-gray-500 text-xs">
-                  {movie.title} 포스터
-                </div>
+                {movie.poster ? (
+                  <img
+                    src={movie.poster}
+                    alt={`${movie.title} 포스터`}
+                    className="w-full h-36 object-cover rounded mb-2"
+                  />
+                ) : (
+                  <div className="w-full h-36 bg-gray-200 rounded flex items-center justify-center mb-2 text-gray-500 text-xs text-center p-2">
+                    {movie.title} 포스터 (이미지 없음)
+                  </div>
+                )}
                 <span className="text-sm font-medium text-center">
                   {movie.title}
                 </span>
